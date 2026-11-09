@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siswaku - Portfolio & Dashboard Siswa</title>
+    <!-- Terapkan tema tersimpan lebih awal supaya layar tidak berkedip -->
+    <script>
+        try {
+            var t = localStorage.getItem('siswaku_tema');
+            if (t === 'dark' || (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        } catch (e) {}
+    </script>
+    <!-- PWA: supaya bisa dipasang seperti aplikasi -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Siswaku">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        /* Achievement Medal Custom Gradients */
+        .gold-card {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border-color: #fcd34d;
+        }
+        .silver-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-color: #cbd5e1;
+        }
+        .bronze-card {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border-color: #fdba74;
+        }
+        .default-card {
+            background: #ffffff;
+            border-color: #e2e8f0;
+        }
+
+        /* ===== Perapian umum ===== */
+        html { -webkit-tap-highlight-color: transparent; }
+        body { transition: background-color .25s ease, color .25s ease; }
+        button:not(:disabled):active { transform: scale(.98); }
+        button:disabled { cursor: not-allowed; }
+        :focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+        img { max-width: 100%; }
+
+        /* ===== Mode gelap ===== */
+        :root { --chip-bg: #ffffff; }
+        html.dark { --chip-bg: #141b2d; color-scheme: dark; }
+        html.dark body.bg-slate-50 { background-color: #0b1020; color: #e2e8f0; }
+        .dark .glass-nav { background: rgba(11, 16, 32, 0.85); }
+        .dark #auth-modal, .dark #guru-page { background-color: #0b1020; }
+
+        /* permukaan */
+        .dark .bg-white { background-color: #141b2d; }
+        .dark .bg-slate-50 { background-color: #1a2338; }
+        .dark .bg-slate-100 { background-color: #1f2a44; }
+        .dark .bg-slate-200 { background-color: #2a3654; }
+        .dark .bg-slate-900 { background-color: #1e293b; border: 1px solid #334155; }
+        .dark .bg-slate-900\/40, .dark .bg-slate-900\/50, .dark .bg-slate-900\/60 { background-color: rgba(2, 6, 23, 0.7); }
+
+        /* warna latar lembut */
+        .dark .bg-indigo-50, .dark .bg-indigo-50\/80 { background-color: rgba(99, 102, 241, 0.16); }
+        .dark .bg-indigo-100 { background-color: rgba(99, 102, 241, 0.28); }
+        .dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.12); }
+        .dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.22); }
+        .dark .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.22); }
+        .dark .bg-rose-50 { background-color: rgba(244, 63, 94, 0.12); }
+        .dark .bg-rose-100 { background-color: rgba(244, 63, 94, 0.22); }
+        .dark .bg-sky-100 { background-color: rgba(14, 165, 233, 0.22); }
+
+        /* teks */
+        .dark .text-slate-900, .dark .text-slate-800 { color: #f1f5f9; }
+        .dark .text-slate-700 { color: #e2e8f0; }
+        .dark .text-slate-600 { color: #cbd5e1; }
+        .dark .text-slate-500 { color: #94a3b8; }
+        .dark .text-slate-400 { color: #8190aa; }
+        .dark .text-indigo-500, .dark .text-indigo-600 { color: #a5b4fc; }
+        .dark .text-indigo-700 { color: #c7d2fe; }
+        .dark .text-amber-600, .dark .text-amber-700, .dark .text-amber-800 { color: #fcd34d; }
+        .dark .text-emerald-600, .dark .text-emerald-700, .dark .text-emerald-800 { color: #6ee7b7; }
+        .dark .text-rose-500, .dark .text-rose-600, .dark .text-rose-700, .dark .text-rose-800 { color: #fda4af; }
+        .dark .text-sky-800 { color: #7dd3fc; }
+        .dark .text-amber-600\/80 { color: #fcd34d; opacity: 0.9; }
+
+        /* garis tepi */
+        .dark .border-slate-100 { border-color: #222d47; }
+        .dark .border-slate-200, .dark .border-slate-300, .dark .border-slate-200\/70 { border-color: #2f3b58; }
+        .dark .border-amber-200, .dark .border-amber-200\/80 { border-color: rgba(245, 158, 11, 0.4); }
+        .dark .border-indigo-200 { border-color: rgba(129, 140, 248, 0.45); }
+        .dark .border-rose-200, .dark .border-rose-200\/80 { border-color: rgba(251, 113, 133, 0.45); }
+
+        /* saat kursor di atas */
+        .dark .hover\:bg-slate-50:hover { background-color: #1f2a44; }
+        .dark .hover\:bg-slate-100:hover { background-color: #26324d; }
+        .dark .hover\:bg-slate-200:hover { background-color: #2f3d5e; }
+        .dark .hover\:bg-indigo-50:hover { background-color: rgba(99, 102, 241, 0.22); }
+        .dark .hover\:bg-indigo-100:hover { background-color: rgba(99, 102, 241, 0.32); }
+        .dark .hover\:bg-rose-50:hover { background-color: rgba(244, 63, 94, 0.18); }
+        .dark .hover\:text-slate-800:hover { color: #f8fafc; }
+        .dark .hover\:text-slate-600:hover { color: #e2e8f0; }
+        .dark .hover\:text-indigo-600:hover { color: #c7d2fe; }
+
+        /* kolom isian */
+        .dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+        .dark select, .dark textarea { background-color: #0f1629; color: #e2e8f0; border-color: #2f3b58; }
+        .dark input::placeholder, .dark textarea::placeholder { color: #64748b; }
+        .dark input:disabled { background-color: #1a2338; color: #8190aa; }
+        .dark .file\:bg-indigo-50::file-selector-button { background-color: rgba(99, 102, 241, 0.2); }
+        .dark .file\:text-indigo-600::file-selector-button { color: #c7d2fe; }
+
+        /* kartu prestasi dan label berwarna */
+        .dark .gold-card { background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.08)); border-color: rgba(245, 158, 11, 0.5); }
+        .dark .silver-card { background: linear-gradient(135deg, rgba(148, 163, 184, 0.18), rgba(148, 163, 184, 0.08)); border-color: rgba(148, 163, 184, 0.4); }
+        .dark .bronze-card { background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(249, 115, 22, 0.08)); border-color: rgba(249, 115, 22, 0.5); }
+        .dark .default-card { background: #141b2d; border-color: #2f3b58; }
+        .dark .chip-warna { filter: brightness(1.45) saturate(1.1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Navigation Bar (Statis & 10-20% Transparan Blur) -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-slate-200/70 shadow-xs transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Left: Logo & Title -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showNotification('Beranda Siswaku')">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/30">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Siswaku</span>
+            </div>
+
+            <!-- Right: Explore, Username, Avatar & Hamburger -->
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <button onclick="openExploreModal()" class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 text-xs font-semibold hover:bg-indigo-100 transition">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Cari Portfolio Teman</span>
+                </button>
+
+                <div class="hidden sm:flex flex-col text-right">
+                    <span class="text-xs font-bold text-slate-800" id="nav-username">Ahmad Fauzan</span>
+                    <span id="nav-info" class="text-[10px] font-medium text-slate-500">XII IPA 1 • Angkatan 2026</span>
+                </div>
+                <img id="nav-avatar" src="https://placehold.co/100x100/6366f1/ffffff?text=AF" alt="Avatar" class="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-500/30 shadow-xs">
+                
+                <button onclick="toggleTema()" aria-label="Ganti tema terang atau gelap" class="p-2 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
+                    <i class="ikon-tema fa-solid fa-moon text-lg"></i>
+                </button>
+
+                <!-- Hamburger Button -->
+                <button id="hamburger-btn" aria-label="Menu" class="p-2 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-indigo-50 transition focus:outline-hidden">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hamburger Drawer Side Menu -->
+    <div id="drawer-backdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden opacity-0 transition-opacity duration-300"></div>
+    <div id="drawer-menu" class="fixed top-0 right-0 w-80 h-full bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between border-l border-slate-100">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-sm font-bold">S</div>
+                    <span class="font-bold text-slate-800 text-lg">Menu Siswaku</span>
+                </div>
+                <button id="close-drawer" aria-label="Tutup" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <nav class="space-y-1.5">
+                <a href="#beranda" onclick="closeDrawer(); showNotification('Beranda Aktif')" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 font-semibold transition">
+                    <i class="fa-solid fa-house w-5 text-center text-indigo-500"></i>
+                    <span>Beranda</span>
+                </a>
+                <button onclick="closeDrawer(); openExploreModal()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 font-semibold transition text-left">
+                    <i class="fa-solid fa-users-viewfinder w-5 text-center text-indigo-500"></i>
+                    <span>Jelajah Portfolio</span>
+                </button>
+                <button onclick="closeDrawer(); openProfileModal()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 font-semibold transition text-left">
+                    <i class="fa-solid fa-user-gear w-5 text-center text-indigo-500"></i>
+                    <span>Akun Anda</span>
+                </button>
+                <button onclick="closeDrawer(); openFeedbackModal()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 font-semibold transition text-left">
+                    <i class="fa-solid fa-comment-dots w-5 text-center text-indigo-500"></i>
+                    <span>Kritik dan Saran</span>
+                </button>
+                <button onclick="closeDrawer(); openSettingsModal()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 font-semibold transition text-left">
+                    <i class="fa-solid fa-gear w-5 text-center text-indigo-500"></i>
+                    <span>Setting</span>
+                </button>
+            </nav>
+        </div>
+        
+        <div class="p-6 border-t border-slate-100 text-center bg-slate-50">
+            <button onclick="closeDrawer(); logout()" class="w-full py-2.5 px-4 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold text-xs transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Keluar Akun</span>
+            </button>
+            <p class="text-[11px] text-slate-400 mt-4">Siswaku v3.0 • Platform Portfolio Digital</p>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
+
+        <!-- Top Section: Student Portfolio Card (70-80% width relative) -->
+        <section id="beranda" class="w-full flex justify-center">
+            <div class="w-full md:w-[80%] bg-white rounded-3xl shadow-lg border border-slate-100 p-6 sm:p-8 relative overflow-hidden transition-all duration-300">
+                
+                <!-- Background Accent Glow -->
+                <div class="absolute -right-20 -top-20 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <!-- Header Info & Edit Button (Pojok Kanan Card Portfolio) -->
+                <div class="flex items-start justify-between mb-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-5">
+                        <img id="card-avatar" src="https://placehold.co/120x120/6366f1/ffffff?text=AF" alt="Foto Siswa" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-4 ring-indigo-500/20 shadow-md">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h1 id="card-name" class="text-xl sm:text-2xl font-extrabold text-slate-900">Ahmad Fauzan</h1>
+                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Aktif Siswa</span>
+                            </div>
+                            <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                                NIS: <span id="card-nis" class="font-semibold text-slate-700">22019482</span> • 
+                                Kelas: <span id="card-grade" class="font-bold text-indigo-600">XII IPA 1</span> • 
+                                Angkatan: <span id="card-angkatan" class="font-semibold text-slate-700">2026</span>
+                            </p>
+                            
+                            <!-- Koin Siswa (Guru Control Only) & Pelanggaran Badges -->
+                            <div class="flex flex-wrap gap-2.5 mt-3">
+                                <span class="px-3 py-1 bg-amber-50 border border-amber-200/80 rounded-xl text-xs font-bold text-amber-800 flex items-center space-x-1.5 shadow-2xs" title="Koin diisi oleh Guru / Pihak Sekolah">
+                                    <i class="fa-solid fa-coins text-amber-500 text-sm"></i>
+                                    <span id="card-coins">450 Koin</span>
+                                    <span class="text-[10px] text-amber-600/80 font-normal ml-1">(Oleh Guru)</span>
+                                </span>
+                                <span class="px-3 py-1 bg-rose-50 border border-rose-200/80 rounded-xl text-xs font-bold text-rose-800 flex items-center space-x-1.5 shadow-2xs">
+                                    <i class="fa-solid fa-shield-alert text-rose-500"></i>
+                                    <span id="card-violation">0 Skor Pelanggaran</span>
+                                </span>
+                                <button type="button" onclick="openRiwayatModal()" class="px-3 py-1 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-1.5 shadow-2xs transition">
+                                    <i class="fa-solid fa-clock-rotate-left text-slate-400"></i>
+                                    <span>Riwayat dari guru</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Portfolio Button (Atas Pojok Kanan) -->
+                    <button onclick="openProfileModal()" aria-label="Edit Portfolio" class="px-3 py-2 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white text-xs font-bold transition flex items-center space-x-1.5 shadow-2xs shrink-0">
+                        <i class="fa-solid fa-pen-to-string"></i>
+                        <span class="hidden sm:inline">Edit Portfolio</span>
+                    </button>
+                </div>
+
+                <hr class="border-slate-100 my-6">
+
+                <!-- Multi-Prestasi Section (Width ~80% dari Card Portfolio) -->
+                <div class="w-full flex flex-col items-center mb-8">
+                    <div class="w-full md:w-[80%]">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-2 text-indigo-600">
+                                <i class="fa-solid fa-trophy text-lg"></i>
+                                <h2 class="text-sm font-extrabold uppercase tracking-wide text-slate-800">Daftar Prestasi Siswa</h2>
+                            </div>
+                            <button onclick="openAddAchievementModal()" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition flex items-center space-x-1 shadow-2xs">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                                <span>Tambah Prestasi</span>
+                            </button>
+                        </div>
+
+                        <!-- Dynamic Achievement Container -->
+                        <div id="achievement-grid" class="flex flex-wrap gap-4 justify-center">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ekstrakulikuler & Organisasi (Di Bawah Prestasi Membentuk Row) -->
+                <div class="w-full flex justify-center">
+                    <div class="w-full md:w-[80%] grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Ekstrakulikuler -->
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <div class="flex items-center space-x-2 text-indigo-600 mb-1.5">
+                                <i class="fa-solid fa-basketball-ball"></i>
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Ekstrakulikuler</span>
+                            </div>
+                            <div id="card-extracurricular" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+
+                        <!-- Organisasi -->
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <div class="flex items-center space-x-2 text-indigo-600 mb-1.5">
+                                <i class="fa-solid fa-sitemap"></i>
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Organisasi</span>
+                            </div>
+                            <div id="card-organization" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Middle Section: 4 Feature Cards (Dispen, Toko Koin, Pelanggaran, Ranking GO) -->
+        <section class="w-full flex justify-center">
+            <div class="w-full md:w-[80%] grid grid-cols-1 sm:grid-cols-2 gap-5">
+                
+                <!-- Card 1: Dispen Digital -->
+                <div onclick="openDispenModal()" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:border-indigo-300 hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mb-4 group-hover:bg-indigo-600 group-hover:text-white transition shadow-2xs">
+                            <i class="fa-solid fa-file-circle-check"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-800 mb-1">Dispen Digital</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Ajukan dispensasi izin lomba/kegiatan secara resmi & digital.</p>
+                    </div>
+                    <div class="mt-5 flex items-center text-xs font-bold text-indigo-600 space-x-1 group-hover:translate-x-1 transition">
+                        <span>Buat Permohonan</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Card 2: Toko Koin -->
+                <div onclick="openTokoModal()" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:border-amber-300 hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl mb-4 group-hover:bg-amber-500 group-hover:text-white transition shadow-2xs">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-800 mb-1">Toko Koin</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Penukaran koin prestasi siswa dengan kupon kantin & fasilitas sekolah.</p>
+                    </div>
+                    <div class="mt-5 flex items-center text-xs font-bold text-amber-600 space-x-1 group-hover:translate-x-1 transition">
+                        <span>Tukar Koin</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Card 3: Laporkan Pelanggaran -->
+                <div onclick="openLaporanModal()" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:border-rose-300 hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl mb-4 group-hover:bg-rose-600 group-hover:text-white transition shadow-2xs">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-800 mb-1">Laporkan Pelanggaran</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Adukan kejadian pelanggaran tata tertib sekolah demi kenyamanan bersama.</p>
+                    </div>
+                    <div class="mt-5 flex items-center text-xs font-bold text-rose-600 space-x-1 group-hover:translate-x-1 transition">
+                        <span>Kirim Laporan</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Card 4: Ranking Urutan (Ganesha Operation Style) -->
+                <div onclick="openRankingModal()" class="bg-gradient-to-br from-indigo-900 via-indigo-800 to-violet-900 text-white p-6 rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md text-amber-300 flex items-center justify-center text-xl shadow-xs">
+                                <i class="fa-solid fa-ranking-star"></i>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-[10px] font-extrabold tracking-wide">GO Style Ranking</span>
+                        </div>
+                        <h3 class="text-base font-bold text-white mb-1">Ranking Urutan</h3>
+                        <p class="text-xs text-indigo-200 leading-relaxed">Cek Peringkat Kelas & Angkatan lengkap dengan pencarian nama teman.</p>
+                    </div>
+                    <div class="mt-5 flex items-center text-xs font-bold text-amber-300 space-x-1 group-hover:translate-x-1 transition">
+                        <span>Lihat Rank Kelas & Angkatan</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Bottom Section: Catatan Buat Pengingat (Width ~70-80%) -->
+        <section class="w-full flex justify-center">
+            <div class="w-full md:w-[80%] bg-white rounded-3xl shadow-lg border border-slate-100 p-6 sm:p-8">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-2.5 text-indigo-600">
+                        <i class="fa-solid fa-note-sticky text-xl"></i>
+                        <h2 class="text-base font-bold text-slate-800">Catatan Buat Pengingat</h2>
+                    </div>
+                    <button onclick="saveNotes()" class="px-3.5 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white text-xs font-bold transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Catatan</span>
+                    </button>
+                </div>
+                <textarea id="reminder-notes" rows="3" class="w-full p-4 rounded-2xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-sm text-slate-700 outline-none resize-none transition" placeholder="Tulis pengingat tugas, jadwal ulangan, atau agenda penting di sini...">1. Kumpulkan tugas project web development sebelum hari Jumat jam 15.00 WIB.
+2. Bawa perlengkapan basket untuk latihan sore ini di GOR sekolah.</textarea>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
+        <p>&copy; 2026 Siswaku Portfolio Dashboard. All rights reserved.</p>
+    </footer>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 z-[70] transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 text-sm">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-message">Notifikasi Berhasil</span>
+    </div>
+
+    <!-- Modal 1: Edit Profile (Tanpa Edit Koin) -->
+    <div id="profile-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 sm:p-8 transform scale-95 transition-all duration-300 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-slate-800">Edit Portfolio Siswa</h3>
+                <button onclick="closeProfileModal()" aria-label="Tutup" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form onsubmit="handleProfileUpdate(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+                    <input type="text" id="input-name" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Foto Profil</label>
+                    <div class="flex items-center space-x-3">
+                        <img id="preview-avatar" alt="Foto profil" class="w-16 h-16 rounded-2xl object-cover ring-2 ring-indigo-500/20 hidden">
+                        <div class="flex-1">
+                            <input type="file" id="input-avatar-file" accept="image/*" onchange="pilihFotoProfil(this)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                            <button type="button" onclick="pakaiFotoInisial()" class="text-[10px] font-bold text-indigo-600 hover:underline mt-1.5">Pakai foto inisial</button>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1">*Pilih foto dari galeri atau kamera. Ukurannya dikecilkan otomatis.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Kelas</label>
+                        <select id="input-grade" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white" required></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Angkatan (otomatis)</label>
+                        <input type="text" id="input-angkatan" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-slate-100 text-slate-500 cursor-not-allowed" disabled>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Koin Siswa (Dikelola Guru)</label>
+                    <input type="text" id="input-coins-disabled" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-slate-100 text-slate-500 cursor-not-allowed" disabled>
+                    <p class="text-[10px] text-amber-600 mt-1">*Koin siswa disesuaikan oleh pihak Guru/Sekolah.</p>
+                </div>
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Ekstrakulikuler</label>
+                        <div id="dd-ekskul"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Organisasi</label>
+                        <div id="dd-org"></div>
+                        <p class="text-[10px] text-slate-400 mt-1">*Boleh pilih lebih dari satu.</p>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeProfileModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition shadow-md shadow-indigo-500/20">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Tambah Prestasi Baru (Dengan Foto Bukti & Kategori Juara) -->
+    <div id="add-achievement-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 id="ach-modal-title" class="text-lg font-bold text-slate-800">Tambah Prestasi Baru</h3>
+                <button onclick="closeAddAchievementModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form onsubmit="handleSaveAchievement(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Prestasi / Lomba</label>
+                    <input type="text" id="input-ach-title" placeholder="Contoh: Olimpiade Matematika Nasional" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tingkat Juara</label>
+                        <select id="input-ach-rank" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required>
+                            <option value="Juara 1">Juara 1 (Emas)</option>
+                            <option value="Juara 2">Juara 2 (Perak)</option>
+                            <option value="Juara 3">Juara 3 (Perunggu)</option>
+                            <option value="Juara Harapan 1">Juara Harapan 1</option>
+                            <option value="Lainnya">Lainnya / Finalis</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tahun / Tanggal</label>
+                        <input type="text" id="input-ach-date" placeholder="2026" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tim / Anggota (Opsional)</label>
+                    <input type="text" id="input-ach-team" placeholder="Contoh: Ahmad Fauzan, Siti Rahma, Budi S." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Foto Bukti / Sertifikat / Piala</label>
+                    <img id="preview-ach" alt="Pratinjau foto" class="w-full h-32 rounded-xl object-cover border border-slate-200 mb-2 hidden">
+                    <input type="file" id="input-ach-photo-file" accept="image/*" onchange="pilihFotoPrestasi(this)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                    <p class="text-[10px] text-slate-400 mt-1">*Unggah foto sertifikat atau piala sebagai bukti. Teman dan guru bisa melihatnya, dan prestasi tanpa bukti ditandai "Belum ada bukti".</p>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeAddAchievementModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition shadow-md shadow-indigo-500/20" id="ach-submit-btn">Simpan Prestasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 3: Detail Prestasi (Pop-up saat Card Prestasi Diklik) -->
+    <div id="view-achievement-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 relative text-center max-h-[90vh] overflow-y-auto">
+            <button onclick="closeViewAchievementModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            
+            <img id="view-ach-img" src="" alt="Bukti Prestasi" class="w-full h-48 rounded-2xl object-cover mb-4 shadow-sm border border-slate-100">
+            <span id="view-ach-badge" class="px-3 py-1 rounded-full text-xs font-bold inline-block mb-2">Juara 1</span>
+            <h3 id="view-ach-title" class="text-lg font-bold text-slate-900 mb-1">Olimpiade Fisika Kota</h3>
+            <p id="view-ach-date" class="text-xs text-slate-400 mb-4">Tahun 2026</p>
+
+            <div class="p-3 bg-slate-50 rounded-2xl text-left border border-slate-100 mb-5 text-xs space-y-1">
+                <p><span class="font-bold text-slate-600">Anggota Tim:</span> <span id="view-ach-team" class="text-slate-800">Individu</span></p>
+                <p><span class="font-bold text-slate-600">Status Verifikasi:</span> <span class="text-emerald-600 font-bold">Terverifikasi Guru BK</span></p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <button onclick="editAchievement()" class="py-2.5 rounded-xl border border-indigo-200 text-indigo-600 text-xs font-bold hover:bg-indigo-50 transition"><i class="fa-solid fa-pen mr-1.5"></i>Edit</button>
+                <button onclick="hapusPrestasi()" class="py-2.5 rounded-xl border border-rose-200 text-rose-600 text-xs font-bold hover:bg-rose-50 transition"><i class="fa-solid fa-trash mr-1.5"></i>Hapus</button>
+            </div>
+            <button onclick="closeViewAchievementModal()" class="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition">Tutup Detail</button>
+        </div>
+    </div>
+
+    <!-- Modal 4: Categorized Ranking GO Style (Rank Kelas & Rank Angkatan + Search) -->
+    <div id="ranking-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-6 sm:p-8 relative max-h-[90vh] flex flex-col">
+            
+            <!-- Header Modal -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-lg shadow-md shadow-amber-500/30">
+                        <i class="fa-solid fa-ranking-star"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">Peringkat & Leaderboard</h3>
+                        <p class="text-xs text-slate-400">Ganesha Operation Ranking Format</p>
+                    </div>
+                </div>
+                <button onclick="closeRankingModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <!-- Tab Kategori: Rank Kelas vs Rank Angkatan -->
+            <div class="flex bg-slate-100 p-1 rounded-2xl mb-4">
+                <button id="tab-rank-kelas" onclick="switchRankTab('kelas')" class="flex-1 py-2 text-xs font-bold rounded-xl transition bg-white text-indigo-600 shadow-2xs">
+                    Rank Kelas (XII IPA 1)
+                </button>
+                <button id="tab-rank-angkatan" onclick="switchRankTab('angkatan')" class="flex-1 py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-slate-800">
+                    Rank Angkatan (Seluruh XII)
+                </button>
+            </div>
+
+            <!-- Searching Bar di bawah Kategori -->
+            <div class="relative mb-4">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                <input type="text" id="search-student-rank" oninput="filterRankings()" placeholder="Cari nama siswa..." class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+            </div>
+
+            <!-- List Peringkat Siswa -->
+            <div id="ranking-list" class="flex-grow overflow-y-auto space-y-2.5 pr-1">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 text-right">
+                <button onclick="closeRankingModal()" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">Tutup Peringkat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: Public Student Portfolio Inspector (Melihat Portfolio Siswa Lain) -->
+    <div id="public-portfolio-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closePublicPortfolioModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+
+            <!-- Card Banner -->
+            <div class="flex items-center space-x-4 mb-6">
+                <img id="pub-avatar" src="" alt="Public Student" class="w-16 h-16 rounded-2xl object-cover ring-4 ring-indigo-500/20 shadow-md">
+                <div>
+                    <h3 id="pub-name" class="text-xl font-bold text-slate-900">Nama Siswa</h3>
+                    <p id="pub-info" class="text-xs text-slate-500">Kelas XII IPA 1 • NIS 2201999</p>
+                    <div class="flex items-center space-x-2 mt-2">
+                        <span id="pub-coins" class="px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[10px] font-bold">300 Koin</span>
+                        <span id="pub-rank" class="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-[10px] font-bold">Rank #1 Angkatan</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Details -->
+            <div class="space-y-4">
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Prestasi Terdaftar</h4>
+                    <div id="pub-achievements" class="space-y-2">
+                        <!-- Dynamic list -->
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Ekstrakulikuler</p>
+                        <div id="pub-extra" class="flex flex-wrap gap-1 mt-1"></div>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Organisasi</p>
+                        <div id="pub-org" class="flex flex-wrap gap-1 mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <button onclick="closePublicPortfolioModal()" class="w-full py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition">Kembali</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 6: Jelajah Seluruh Portfolio Siswa -->
+    <div id="explore-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl p-6 sm:p-8 relative max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Jelajah Portfolio Siswa</h3>
+                    <p class="text-xs text-slate-400">Cari & lihat profil siswa lain dalam satu Sekolah</p>
+                </div>
+                <button onclick="closeExploreModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <div class="relative mb-4">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                <input type="text" id="search-explore" oninput="renderExploreList()" placeholder="Ketik nama atau kelas..." class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+            </div>
+
+            <div id="explore-list" class="flex-grow overflow-y-auto space-y-2.5 pr-1">
+                <!-- Dynamic explore list -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Modal & Feedback/Settings -->
+    <div id="feature-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 relative text-center max-h-[90vh] overflow-y-auto">
+            <h3 id="feature-modal-title" class="text-lg font-bold text-slate-800 mb-2">Judul Fitur</h3>
+            <p id="feature-modal-desc" class="text-xs text-slate-500 leading-relaxed mb-6">Deskripsi fitur.</p>
+            <button onclick="closeFeatureModal()" class="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">Tutup</button>
+        </div>
+    </div>
+
+    <div id="feedback-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Kritik dan Saran</h3>
+            <textarea id="feedback-text" rows="4" class="w-full p-3 rounded-2xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 mb-4" placeholder="Tuliskan masukan anda..."></textarea>
+            <button onclick="submitFeedback()" class="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">Kirim Masukan</button>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Pengaturan</h3>
+            <p class="text-xs text-slate-500 mb-4">Pengaturan tampilan aplikasi Siswaku.</p>
+            <label class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-100 mb-6 cursor-pointer">
+                <span class="flex items-center space-x-2.5 text-sm font-semibold text-slate-700">
+                    <i class="ikon-tema fa-solid fa-moon text-indigo-500 w-5 text-center"></i>
+                    <span>Mode gelap</span>
+                </span>
+                <input type="checkbox" id="switch-tema" onchange="toggleTema()" class="w-5 h-5 accent-indigo-600">
+            </label>
+            <button onclick="closeSettingsModal(); showNotification('Pengaturan tersimpan')" class="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">Simpan</button>
+        </div>
+    </div>
+
+    <!-- Modal: Dispen Digital -->
+    <div id="dispen-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Dispen Digital</h3>
+                    <p class="text-xs text-slate-400">Ajukan izin dispensasi lomba atau kegiatan</p>
+                </div>
+                <button onclick="closeDispenModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form onsubmit="handleSimpanDispen(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis kegiatan</label>
+                    <select id="dispen-jenis" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white" required>
+                        <option>Lomba / kompetisi</option>
+                        <option>Kegiatan organisasi</option>
+                        <option>Kegiatan lain</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama kegiatan</label>
+                    <input type="text" id="dispen-kegiatan" placeholder="Contoh: Olimpiade Sains Tingkat Kota" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal mulai</label>
+                        <input type="date" id="dispen-mulai" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal selesai</label>
+                        <input type="date" id="dispen-selesai" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan (opsional)</label>
+                    <textarea id="dispen-ket" rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="Tambahkan keterangan jika perlu"></textarea>
+                </div>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition shadow-md shadow-indigo-500/20">Ajukan dispen</button>
+            </form>
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2">Riwayat pengajuan</h4>
+            <div id="dispen-list" class="space-y-2.5"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Laporkan Pelanggaran -->
+    <div id="laporan-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Laporkan Pelanggaran</h3>
+                    <p class="text-xs text-slate-400">Laporan dikirim ke Bimbingan Konseling (BK)</p>
+                </div>
+                <button onclick="closeLaporanModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form onsubmit="handleSimpanLaporan(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis pelanggaran</label>
+                    <select id="laporan-jenis" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white" required>
+                        <option>Perundungan (bullying)</option>
+                        <option>Kekerasan fisik</option>
+                        <option>Menyontek / kecurangan</option>
+                        <option>Merusak fasilitas sekolah</option>
+                        <option>Pelanggaran tata tertib lain</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal kejadian</label>
+                        <input type="date" id="laporan-tanggal" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Lokasi</label>
+                        <input type="text" id="laporan-lokasi" placeholder="Contoh: Kantin" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Siswa yang terlibat (opsional)</label>
+                    <input type="text" id="laporan-terlibat" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Kronologi</label>
+                    <textarea id="laporan-kronologi" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="Ceritakan apa yang terjadi" required></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Foto bukti (opsional)</label>
+                    <img id="preview-laporan" alt="Pratinjau foto" class="w-full h-32 rounded-xl object-cover border border-slate-200 mb-2 hidden">
+                    <input type="file" id="input-laporan-foto" accept="image/*" onchange="pilihFotoLaporan(this)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                </div>
+                <label class="flex items-center space-x-2 text-xs text-slate-600">
+                    <input type="checkbox" id="laporan-anonim" class="rounded border-slate-300">
+                    <span>Kirim sebagai anonim</span>
+                </label>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition shadow-md shadow-rose-500/20">Kirim laporan</button>
+            </form>
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2">Riwayat laporan</h4>
+            <div id="laporan-list" class="space-y-2.5"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Toko Koin -->
+    <div id="toko-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Toko Koin</h3>
+                    <p class="text-xs text-slate-400">Tukarkan koin dengan hadiah sekolah</p>
+                </div>
+                <button onclick="closeTokoModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="flex items-center justify-between p-3 rounded-2xl bg-amber-50 border border-amber-200 mb-4">
+                <div class="flex items-center space-x-2 text-amber-800 text-sm font-bold">
+                    <i class="fa-solid fa-coins text-amber-500"></i>
+                    <span id="toko-saldo">0 Koin</span>
+                </div>
+            </div>
+            <div id="toko-items" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2">Barang yang sudah ditukar</h4>
+            <div id="toko-riwayat" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Riwayat dari guru (siswa) -->
+    <div id="riwayat-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-[58] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Riwayat dari Guru</h3>
+                    <p class="text-xs text-slate-400">Perubahan koin dan skor pelanggaran</p>
+                </div>
+                <button onclick="closeRiwayatModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div id="riwayat-list" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- Lihat foto layar penuh -->
+    <div id="foto-modal" onclick="tutupFoto()" class="fixed inset-0 bg-slate-900/80 z-[59] flex items-center justify-center p-4 hidden cursor-zoom-out">
+        <img id="foto-besar" alt="Foto" class="max-w-full max-h-full rounded-2xl shadow-2xl">
+    </div>
+
+    <!-- Modal: Kelola siswa (guru) -->
+    <div id="kelola-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-[58] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 id="kelola-nama" class="text-lg font-bold text-slate-800">Nama siswa</h3>
+                    <p id="kelola-info" class="text-xs text-slate-400"></p>
+                </div>
+                <button onclick="closeKelolaModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="mb-5 p-4 rounded-2xl border border-slate-100">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Portofolio siswa (acuan menambah koin)</h4>
+                <div id="kelola-chips" class="flex flex-wrap gap-1.5 mb-3"></div>
+                <div id="kelola-prestasi" class="space-y-2"></div>
+            </div>
+            <div class="space-y-3">
+                <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-700"><i class="fa-solid fa-coins text-amber-500 mr-1.5"></i>Koin</span>
+                    <span class="text-xs font-bold text-slate-500">Sekarang: <span id="kelola-koin-now">0</span></span>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="number"  id="kelola-koin" placeholder="+50 atau -20" class="sm:w-40 px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                    <input type="text" id="kelola-koin-cat" placeholder="Catatan / alasan" class="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                    <button type="button" onclick="terapkanKoin()" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition">Terapkan</button>
+                </div>
+            </div>
+                <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-700"><i class="fa-solid fa-triangle-exclamation text-rose-500 mr-1.5"></i>Skor pelanggaran</span>
+                    <span class="text-xs font-bold text-slate-500">Sekarang: <span id="kelola-pel-now">0</span></span>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="number"  id="kelola-pel" placeholder="+5 atau -2" class="sm:w-40 px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                    <input type="text" id="kelola-pel-cat" placeholder="Catatan / alasan" class="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                    <button type="button" onclick="terapkanPelanggaran()" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 transition">Terapkan</button>
+                </div>
+            </div>
+            </div>
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2">Riwayat perubahan</h4>
+            <div id="kelola-riwayat" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- Halaman Guru -->
+    <div id="guru-page" class="fixed inset-0 z-[55] bg-slate-100 overflow-y-auto hidden">
+        <div class="max-w-4xl mx-auto p-4 sm:p-6">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/30"><i class="fa-solid fa-chalkboard-user"></i></div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Halaman Guru</h2>
+                        <p id="guru-nama" class="text-xs text-slate-500"></p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="toggleTema()" aria-label="Ganti tema" class="p-2 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition"><i class="ikon-tema fa-solid fa-moon text-lg"></i></button>
+                    <button onclick="muatDataGuru()" class="px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition"><i class="fa-solid fa-rotate mr-1.5"></i>Muat ulang</button>
+                    <button onclick="logout()" class="px-3 py-2 rounded-xl border border-rose-200 text-rose-600 text-xs font-semibold hover:bg-rose-50 transition"><i class="fa-solid fa-right-from-bracket mr-1.5"></i>Keluar</button>
+                </div>
+            </div>
+
+            <div class="flex bg-white p-1 rounded-2xl mb-4 shadow-2xs gap-1">
+                <button id="guru-tabbtn-siswa" onclick="setTabGuru('siswa')" class="flex-1 py-2 px-3 text-xs font-bold rounded-xl transition bg-emerald-600 text-white shadow-2xs">Siswa (<span id="guru-hitung-siswa">0</span>)</button>
+                <button id="guru-tabbtn-dispen" onclick="setTabGuru('dispen')" class="flex-1 py-2 px-3 text-xs font-bold rounded-xl transition text-slate-500 hover:text-slate-800">Dispen menunggu (<span id="guru-hitung-dispen">0</span>)</button>
+                <button id="guru-tabbtn-laporan" onclick="setTabGuru('laporan')" class="flex-1 py-2 px-3 text-xs font-bold rounded-xl transition text-slate-500 hover:text-slate-800">Laporan baru (<span id="guru-hitung-laporan">0</span>)</button>
+            </div>
+
+            <div id="guru-siswa">
+                <input type="text" id="guru-cari" oninput="renderGuruSiswa()" placeholder="Cari nama, kelas, atau NIS..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                <div id="guru-siswa-list" class="space-y-2.5"></div>
+            </div>
+            <div id="guru-dispen" class="hidden">
+                <div id="guru-filter-dispen" class="flex flex-wrap gap-2 mb-3"></div>
+                <div id="guru-dispen-list" class="space-y-3"></div>
+            </div>
+            <div id="guru-laporan" class="hidden">
+                <div id="guru-laporan-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Laporkan prestasi orang lain -->
+    <div id="lapor-prestasi-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-[58] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Laporkan Prestasi</h3>
+                    <p class="text-xs text-slate-400">Laporan dikirim ke guru untuk diperiksa</p>
+                </div>
+                <button onclick="tutupLaporPrestasi()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div id="lapor-prestasi-info" class="p-3 rounded-2xl bg-slate-50 border border-slate-100 mb-4 text-xs"></div>
+            <form onsubmit="handleLaporPrestasi(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Alasan</label>
+                    <select id="lapor-prestasi-alasan" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white" required>
+                        <option>Tidak ada bukti atau fotonya tidak jelas</option>
+                        <option>Foto bukti tidak sesuai dengan prestasinya</option>
+                        <option>Prestasi ini tidak pernah diraih</option>
+                        <option>Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan (opsional)</label>
+                    <textarea id="lapor-prestasi-ket" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="Ceritakan kenapa kamu curiga"></textarea>
+                </div>
+                <label class="flex items-center space-x-2 text-xs text-slate-600">
+                    <input type="checkbox" id="lapor-prestasi-anonim" class="rounded border-slate-300">
+                    <span>Kirim sebagai anonim (nama tidak ditampilkan ke guru)</span>
+                </label>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition shadow-md shadow-rose-500/20">Kirim laporan</button>
+                <p class="text-[10px] text-slate-400">Laporkan hanya kalau kamu benar-benar curiga. Guru akan memeriksa dulu, dan laporan yang tidak benar juga bisa ditindaklanjuti.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dialog konfirmasi (pengganti pop-up bawaan browser) -->
+    <div id="konfirmasi-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-[62] flex items-center justify-center p-4 hidden" onclick="if (event.target === this) jawabKonfirmasi(false)">
+        <div role="alertdialog" aria-modal="true" aria-labelledby="konfirmasi-judul" aria-describedby="konfirmasi-pesan" class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 text-center">
+            <div class="w-12 h-12 mx-auto rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+                <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+            </div>
+            <h3 id="konfirmasi-judul" class="text-base font-bold text-slate-800 mb-1">Yakin?</h3>
+            <p id="konfirmasi-pesan" class="text-xs text-slate-500 mb-5"></p>
+            <div class="flex gap-3">
+                <button type="button" id="konfirmasi-tidak" onclick="jawabKonfirmasi(false)" class="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 transition">Batal</button>
+                <button type="button" id="konfirmasi-ya" onclick="jawabKonfirmasi(true)" class="flex-1 py-2.5 rounded-xl text-white text-xs font-semibold transition bg-rose-600 hover:bg-rose-700">Ya</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Layar Daftar / Login (tampil kalau belum login) -->
+    <div id="auth-modal" class="fixed inset-0 z-[60] bg-slate-100 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 my-auto relative">
+            <button type="button" onclick="toggleTema()" aria-label="Ganti tema" class="absolute top-4 right-4 p-2 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition"><i class="ikon-tema fa-solid fa-moon"></i></button>
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/30">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">Siswaku</h2>
+                    <p class="text-xs text-slate-400">Masuk untuk melihat portfolio kamu</p>
+                </div>
+            </div>
+
+            <div class="flex bg-slate-100 p-1 rounded-2xl mb-5">
+                <button type="button" id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-2 text-xs font-bold rounded-xl transition bg-white text-indigo-600 shadow-2xs">Masuk</button>
+                <button type="button" id="tab-daftar" onclick="switchAuthTab('daftar')" class="flex-1 py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-slate-800">Buat akun</button>
+            </div>
+
+            <p id="auth-error" class="text-xs font-semibold text-rose-600 mb-3 min-h-[1rem]"></p>
+
+            <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
+                    <input type="text" id="login-username" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required autocomplete="username">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+                    <input type="password" id="login-password" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition shadow-md shadow-indigo-500/20">Masuk</button>
+            </form>
+
+            <form id="form-daftar" onsubmit="handleDaftar(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama lengkap</label>
+                    <input type="text" id="reg-nama" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Kelas</label>
+                        <select id="reg-kelas" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white" required></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">NIS</label>
+                        <input type="text" id="reg-nis" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
+                    <input type="text" id="reg-username" placeholder="Minimal 3 karakter" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required autocomplete="username">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+                    <input type="password" id="reg-password" placeholder="Minimal 6 karakter" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition shadow-md shadow-indigo-500/20">Buat akun</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="KaryaAkhir.js"></script>
+    <script>
+        // Daftarkan service worker (hanya jalan di alamat https atau localhost)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('service-worker.js').catch(function (e) { console.warn('Service worker gagal:', e); });
+            });
+        }
+    </script>
+</body>
+</html>
